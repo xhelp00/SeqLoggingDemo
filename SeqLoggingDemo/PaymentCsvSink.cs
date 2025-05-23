@@ -41,7 +41,7 @@ public class PaymentCsvSink : ILogEventSink, IDisposable
     public void Dispose() => _writer.Dispose();
 }
 
-// 2) Extension metoda pro pohodlné přidání
+// 2) Extension method for easy configuration
 public static class PaymentCsvSinkExtensions
 {
     public static LoggerConfiguration PaymentCsv(

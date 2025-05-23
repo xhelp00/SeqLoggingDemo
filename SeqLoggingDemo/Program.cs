@@ -4,8 +4,8 @@ using Serilog;
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .WriteTo.Console()
-    .WriteTo.PaymentCsv("payments.csv")     // náš custom sink
-    .WriteTo.Seq("http://localhost:5341")
+    .WriteTo.PaymentCsv("payments.csv")     // custom sink
+    .WriteTo.Seq("http://localhost:5341") // Seq server sink, server running locally in Docker
     .CreateLogger();
 
 var users = new[] { "alice", "bob", "carol", "dave" };
@@ -18,7 +18,7 @@ for (int i = 0; i < 50; i++)
     var orderId = Guid.NewGuid().ToString();
     var total   = Math.Round(rnd.NextDouble() * 200, 2);
 
-    // ID platby unikátní pro každý pokus
+    // payment ID for each attempt
     var paymentId = Guid.NewGuid().ToString();
     var method    = methods[rnd.Next(methods.Length)];
     var timestamp = DateTimeOffset.UtcNow;
@@ -26,7 +26,7 @@ for (int i = 0; i < 50; i++)
     var success = rnd.NextDouble() > 0.2;
     if (success)
     {
-        // stávající strukturovaný + textový log
+        // structured + text log
         Log.Information("Order {@Order} placed", new {
             OrderId = orderId,
             User    = user,
@@ -36,7 +36,7 @@ for (int i = 0; i < 50; i++)
         Log.Information("Payment succeeded for user {User} and order {OrderId}",
                         user, orderId);
 
-        // → Custom CSV událost
+        // custom CSV event
         Log
             .ForContext("EventType",   "PaymentProcessed")
             .ForContext("PaymentId",   paymentId)
@@ -62,8 +62,7 @@ for (int i = 0; i < 50; i++)
         });
         Log.Warning("Payment failed for order {OrderId}. Reason: {Reason}",
                     orderId, reason);
-
-        // Můžeme zapsat i neúspěšnou platbu do CSV (volitelné)
+        
         Log
             .ForContext("EventType",   "PaymentProcessed")
             .ForContext("PaymentId",   paymentId)
