@@ -4,6 +4,7 @@ using Serilog;
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .WriteTo.Console()
+    .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
     .WriteTo.PaymentCsv("payments.csv")     // custom sink
     .WriteTo.Seq("http://localhost:5341") // Seq server sink, server running locally in Docker
     .CreateLogger();
